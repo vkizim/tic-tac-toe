@@ -6,11 +6,7 @@ import reportWebVitals from "./reportWebVitals";
 
 function Square(props) {
   return (
-    <button
-      className="square"
-      key={props.value.toString()}
-      onClick={() => props.onClick()}
-    >
+    <button className="square" onClick={() => props.onClick()}>
       {props.value}
     </button>
   );
@@ -18,26 +14,35 @@ function Square(props) {
 
 function Board({ dimension }) {
   const status = "Следующий игрок: Х";
-  let a = [];
   dimension = 3;
   const [square, setSquare] = useState(Array(dimension * dimension).fill(null));
   function handleClick(i) {
-    console.log(i);
+    let c = [...square.slice()];
+    c.splice(i, 1, "X");
+    setSquare(c);
   }
   function renderSquare(i) {
-    return <Square value={i} onClick={() => handleClick(i)} />;
+    return <Square value={square[i]} onClick={() => handleClick(i)} />;
   }
 
+  const rawArray = [];
+  for (let i = 0; i < dimension * dimension; i++) {
+    rawArray.push(renderSquare(i));
+  }
+  const boardArray = [];
   for (let i = 0; i < dimension; i++) {
-    a.push([...Array(dimension).keys()].map((k) => k + i * dimension));
+    boardArray.push(
+      <div className="board-row">
+        {rawArray.slice(i * dimension, i * dimension + dimension)}
+      </div>
+    );
   }
 
   return (
     <div>
       <div className="status">{status}</div>
-      {a.map((raw) => (
-        <div className="board-row">{raw.map((i) => renderSquare(i))}</div>
-      ))}
+
+      <div className="board-row">{boardArray}</div>
     </div>
   );
 }
