@@ -14,7 +14,9 @@ function Square(props) {
 
 function Board({ square, xIsNext, dimension, onClick }) {
   function renderSquare(i) {
-    return <Square value={square[i]} onClick={() => onClick(i)} />;
+    return (
+      <Square key={i.toString()} value={square[i]} onClick={() => onClick(i)} />
+    );
   }
 
   const rawArray = [];
@@ -24,7 +26,7 @@ function Board({ square, xIsNext, dimension, onClick }) {
   const boardArray = [];
   for (let i = 0; i < dimension; i++) {
     boardArray.push(
-      <div className="board-row">
+      <div className="board-row" key={i}>
         {rawArray.slice(i * dimension, i * dimension + dimension)}
       </div>
     );
@@ -41,58 +43,53 @@ function Game() {
   let dimension = 3;
   const [square, setSquare] = useState(Array(dimension * dimension).fill(null));
   const [xIsNext, setXisNext] = useState(true);
-  const [stepNumber, setStepNumber] = useState(1);
+  const [stepNumber, setStepNumber] = useState(0);
   const [history, setHistory] = useState([
     {
       squares: Array(dimension * dimension).fill(null),
     },
   ]);
-  const current = history[history.length - 1];
+  const current = history[stepNumber];
 
   const winner = calculateWinner(square);
   let status;
   if (winner) {
-    status = "Winner: " + winner;
+    status = "ПОБЕДИТЕЛЬ: " + winner;
   } else {
-    status = "Next player: " + (xIsNext ? "X" : "O");
+    status = "Следующий игрок: " + (xIsNext ? "X" : "O");
   }
 
   function jumpTo(step) {
-    console.log(stepNumber, step, history.length);
     setStepNumber(step);
     setXisNext(step % 2 === 0);
-    setHistory(history.slice(0, step + 1));
-    setStepNumber(history.length - 1);
-    console.log(stepNumber, step, history.length);
   }
 
   function handleClick(i) {
-    console.log("Сработал Клик");
-    console.log("Step number befor " + stepNumber);
+    const h = history.slice(0, stepNumber + 1);
+    const c = h[h.length - 1];
 
-    const square = current.squares.slice();
-    if (calculateWinner(square) || square[i]) {
+    const s = c.squares.slice();
+    if (calculateWinner(s) || s[i]) {
       return;
     }
-    square[i] = xIsNext ? "X" : "O";
-    setSquare(square);
+    s[i] = xIsNext ? "X" : "O";
+    setSquare(s);
 
     setHistory(
-      history.concat([
+      h.concat([
         {
-          squares: square,
+          squares: s,
         },
       ])
     );
-    setStepNumber(history.length - 1);
-    console.log("Step number after " + stepNumber, history);
+    setStepNumber(h.length);
     setXisNext(!xIsNext);
   }
 
   const moves = history.map((step, move) => {
-    const desc = move ? "Go to move #" + move : "Go to game start";
+    const desc = move ? "Перейти на шаг #" + move : "Перейти на начало игры";
     return (
-      <li>
+      <li key={move}>
         <button onClick={() => jumpTo(move)}>{desc}</button>
       </li>
     );
